@@ -1,4 +1,5 @@
 require_relative "attachable"
+require_relative "attachment"
 
 require "active_storage/blob_with_preview_url"
 
@@ -39,6 +40,7 @@ module Lexxy
     initializer "lexxy.attachable" do |app|
       app.config.to_prepare do
         ActionText::Attachable.singleton_class.prepend(Lexxy::Attachable)
+        ActionText::Attachment.prepend(Lexxy::Attachment)
       end
     end
 
@@ -51,6 +53,8 @@ module Lexxy
 
     initializer "lexxy.sanitization" do |app|
       ActiveSupport.on_load(:action_text_content) do
+        ActionText::Attachment::ATTRIBUTES << "alt" unless ActionText::Attachment::ATTRIBUTES.include?("alt")
+
         default_allowed_tags = Class.new.include(ActionText::ContentHelper).new.sanitizer_allowed_tags
         ActionText::ContentHelper.allowed_tags = default_allowed_tags + %w[ video audio source embed table tbody tr th td ]
 
